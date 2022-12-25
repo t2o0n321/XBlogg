@@ -19,8 +19,6 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
-// Enable JSON body parsing
-app.use(express.json())
 // Enable security middleware
 app.use(helmet())
 // Only permit same domain
@@ -28,6 +26,8 @@ app.use(helmet.crossOriginResourcePolicy({ policy: 'same-origin' }))
 // Enable body parsing for large payloads
 app.use(bodyParser.json({ limit: '30mb', extended: true }))
 app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }))
+// Enable JSON body parsing
+app.use(express.json())
 // Enable CORS (Cross-Origin Resource Sharing)
 app.use(cors())
 // Serve static assets
@@ -86,13 +86,14 @@ app.use('/', indexRouter)
 app.use('/api/auth', authRouter)
 
 mongoose.set('strictQuery', false)
-mongoose.connect(process.env.MongoDBUrl, { useNewUrlParser: true })
-    .then(() => {
-        const serverPort = process.env.SERVER_PORT || 8000
-        app.listen(serverPort, () => {
-            console.log(`Server listening on ${ipAddr}:${serverPort}`)
-        })
+mongoose.connect(process.env.MongoDBUrl, {
+    dbName: process.env.MongoDBDBName,
+    useNewUrlParser: true
+}).then(() => {
+    const serverPort = process.env.SERVER_PORT || 8000
+    app.listen(serverPort, () => {
+        console.log(`Server listening on ${ipAddr}:${serverPort}`)
     })
-    .catch((err) => {
-        console.log(err)
-    })
+}).catch((err) => {
+    console.log(err)
+})
